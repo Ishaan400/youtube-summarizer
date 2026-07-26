@@ -1,19 +1,34 @@
 import React, { useState } from 'react';
-import { useSignInEmailPassword } from '@nhost/react';
+import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Youtube } from 'lucide-react';
 
-export default function Login() {
+export default function Login({ setUser }: { setUser: any }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signInEmailPassword, isLoading, isError, error } = useSignInEmailPassword();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { isError } = await signInEmailPassword(email, password);
-    if (!isError) {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/login', {
+        email,
+        password
+      });
+
+      const { token, user } = response.data;
+      localStorage.setItem('token', token);
+      setUser(user);
       navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error signing in');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -29,9 +44,9 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isError && (
+          {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm">
-              {error?.message || 'Error signing in'}
+              {error}
             </div>
           )}
           
