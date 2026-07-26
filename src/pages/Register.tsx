@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
-import { useSignUpEmailPassword } from '@nhost/react';
+import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Youtube } from 'lucide-react';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signUpEmailPassword, isLoading, isError, error } = useSignUpEmailPassword();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { isError } = await signUpEmailPassword(email, password);
-    if (!isError) {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await axios.post('http://localhost:5000/api/register', {
+        email,
+        password
+      });
+
       navigate('/login');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error signing up');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -29,9 +41,9 @@ export default function Register() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isError && (
+          {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-lg text-sm">
-              {error?.message || 'Error signing up'}
+              {error}
             </div>
           )}
           
