@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nhost/nhost-js": "latest",
-    "@nhost/react": "latest",
     "axios": "^1.6.7",
     "lucide-react": "^0.344.0",
+    "mongodb": "^6.3.0",
+    "mongoose": "^7.6.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.22.2"
