@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useSignOut, useUserData } from '@nhost/react';
+import { useNavigate } from 'react-router-dom';
 import { Youtube, Clock, Brain, LogOut } from 'lucide-react';
 
-export default function Dashboard() {
+export default function Dashboard({ user, setUser }: { user: any; setUser: any }) {
   const [url, setUrl] = useState('');
   const [summary, setSummary] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signOut } = useSignOut();
-  const user = useUserData();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,9 +17,12 @@ export default function Dashboard() {
     setSummary('');
 
     try {
-      const response = await axios.post('https://n8n-dev.subspace.money/webhook/ytube', {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:5000/api/summarize', {
         youtubeUrl: url,
-        language: 'English' // Default to English
+        language: 'English'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       let summaryText = '';
@@ -41,6 +43,12 @@ export default function Dashboard() {
     }
   };
 
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50">
       {/* Header */}
@@ -53,7 +61,7 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <span className="text-gray-600">{user?.email}</span>
             <button
-              onClick={signOut}
+              onClick={handleSignOut}
               className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100"
             >
               <LogOut className="h-5 w-5" />
